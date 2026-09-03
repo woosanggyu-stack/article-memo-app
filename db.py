@@ -77,6 +77,12 @@ def _open_spreadsheet():
             "secrets.toml의 sheet_id 값이 시트 URL의 /d/와 /edit 사이 문자열과 정확히 일치하는지 확인해주세요."
         )
         st.stop()
+    except gspread.exceptions.APIError as e:
+        st.error(
+            "구글시트 API 호출이 일시적으로 실패했습니다 (사용량 제한일 수 있어요). "
+            f"잠시 후 새로고침해주세요. ({e})"
+        )
+        st.stop()
 
 
 def _get_or_create_worksheet(name, headers):
@@ -89,10 +95,12 @@ def _get_or_create_worksheet(name, headers):
         return ws
 
 
+@st.cache_resource
 def _projects_ws():
     return _get_or_create_worksheet("projects", PROJECTS_HEADERS)
 
 
+@st.cache_resource
 def _memos_ws():
     return _get_or_create_worksheet("memos", MEMOS_HEADERS)
 
